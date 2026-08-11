@@ -42,7 +42,9 @@ E acessar `http://localhost:8745`.
 
 ## Onde fica o template Excel
 
-O formulário oficial (`templates/teste-pratico-motoristas.xlsx`) é o **template original da LEMAR**, mantido intacto. A exportação nunca recria o Excel do zero: ela carrega esse arquivo, preenche as células correspondentes e gera uma cópia nova — o template original nunca é alterado.
+O formulário oficial (`templates/teste-pratico-motoristas.xlsx`) é o **template mestre da LEMAR**, mantido intacto.
+
+A exportação **não usa nenhuma biblioteca de alto nível para reconstruir a planilha** (nada de `new Workbook()`). O `.xlsx` é um pacote ZIP contendo XMLs; a exportação abre esse ZIP (`JSZip`), localiza apenas as ~65 células que recebem dado do app e substitui SOMENTE o conteúdo de cada uma, preservando o atributo de estilo original (`s="N"`) de cada célula. Todo o resto do pacote — `styles.xml`, `sharedStrings.xml`, `printerSettings`, `theme`, `workbook.xml`, mesclagens, larguras, alturas, configuração de página — nunca é tocado e sai **byte a byte idêntico** ao template. Ver `js/excelExport.js`.
 
 ## Arquitetura
 
@@ -57,12 +59,12 @@ js/
   database.js                  Persistência (IndexedDB + localStorage para config)
   validation.js                Validações de formulário e de finalização
   excelTemplateMap.js          Mapeamento app ↔ células do Excel (única fonte de verdade)
-  excelExport.js               Geração do Excel preenchido a partir do template (ExcelJS)
+  excelExport.js               Preenche o .xlsx original via edição direta do XML (JSZip) — sem reconstruir a planilha
   pdfTemplate.js                Monta o documento HTML próprio (A4) usado para gerar o PDF
   pdfExport.js                  Converte esse HTML em PDF (html2canvas + jsPDF) e compartilha
   assets.js                     Logo da LEMAR embutido em base64 (uso 100% offline no PDF)
   app.js                       Roteamento por hash e todas as telas
-  vendor/exceljs.min.js        Biblioteca ExcelJS (vendorizada para funcionar offline)
+  vendor/jszip.min.js           Biblioteca JSZip (vendorizada — leitura/escrita do pacote .xlsx)
   vendor/jspdf.umd.min.js       Biblioteca jsPDF (vendorizada)
   vendor/html2canvas.min.js     Biblioteca html2canvas (vendorizada)
 templates/teste-pratico-motoristas.xlsx   Template oficial (não é alterado)
@@ -84,7 +86,9 @@ Edite `js/scoringRules.js` — pontuação máxima por grupo, faixas de "ponto d
 
 Edite `js/excelTemplateMap.js`. Esse arquivo é a única fonte de verdade sobre qual célula do template recebe cada dado: identificação do candidato, colunas de nota (1 a 5), coluna de score, células de score por grupo, score total e treinamento/contratação. As funções `preencher*` nunca hardcodam o texto fixo do formulário — elas sempre partem do texto que já está na célula do template, garantindo que rótulos e legendas originais nunca sejam alterados.
 
-A observação digitada pelo avaliador (campo "Observações / Parecer" do app) é exportada no campo **Obs**, logo abaixo do SCORE TOTAL (célula `A39`, mesclada até `H39`) — tanto no Excel quanto no PDF. O bloco **Parecer** do formulário (`A50`) é intencionalmente deixado em branco em ambas as exportações, pois é reservado para preenchimento manual posterior por outra pessoa; nenhuma função do app escreve nessa célula.
+A observação digitada pelo avaliador (campo "Observações / Parecer" do app) é exportada no campo **Obs** que já existe no template (célula `A39`, logo abaixo do SCORE TOTAL) — o app apenas anexa o texto após o rótulo "Obs:" já impresso ali, sem criar nenhuma mesclagem nova. O bloco **Parecer** do formulário (`B48:G49`) é intencionalmente deixado em branco em ambas as exportações (Excel e PDF), pois é reservado para preenchimento manual posterior por outra pessoa; nenhuma função do app escreve nessa célula.
+
+Cada célula é localizada e substituída diretamente no XML por referência (`js/excelExport.js`), preservando seu atributo de estilo original — nunca recriando ou reatribuindo estilo, borda, fonte ou preenchimento.
 
 ## Backup e restauração
 

@@ -24,15 +24,13 @@ const EXCEL_TEMPLATE = {
     contratacaoSim: 'F44',
     contratacaoNao: 'G44',
     obs: 'A39',
-    parecer: 'A50',
     assinatura: 'A51'
   },
 
-  // "Obs" recebe a observação do monitor, imediatamente após o SCORE TOTAL.
-  // O bloco "Parecer" (parecerMergeRange) é reservado para preenchimento manual
-  // posterior e NUNCA deve receber texto do app — fica sempre em branco.
-  obsMergeRange: 'A39:H39',
-  parecerMergeRange: 'A50:H50',
+  // "Obs" (A39) já existe como rótulo fixo no template, logo após o SCORE TOTAL —
+  // a observação do monitor é apenas anexada a esse texto, sem criar mesclagem nova.
+  // O bloco "Parecer" (B48:G49/A50) é reservado para preenchimento manual posterior
+  // e NUNCA recebe texto do app — nenhuma célula dessa região é tocada na exportação.
 
   // Linha inicial de cada grupo na grade de critérios (colunas C..G = notas 1..5, H = score).
   linhaInicialGrupo: {
@@ -65,16 +63,10 @@ function linhasCriteriosGrupo(grupoKey) {
 
 // ---- Funções de preenchimento de texto (preservam o texto fixo original) ----
 
-function preencherNomeCandidato(original, nome) {
-  return `${original.replace(/\s*$/, '')} ${nome || ''}`.trimEnd();
-}
-
-function preencherAvaliador(original, avaliador) {
-  return `${original.replace(/\s*$/, '')} ${avaliador || ''}`.trimEnd();
-}
-
-function preencherFuncao(original, funcao) {
-  return `${original.replace(/\s*$/, '')} ${funcao || ''}`.trimEnd();
+// Usado para todo campo "Rótulo:" existente no template (Nome Candidato, Avaliador,
+// Teste para função de, Obs) — apenas anexa o valor após o texto fixo já presente.
+function preencherRotulo(original, valor) {
+  return `${original.replace(/\s*$/, '')} ${valor || ''}`.trimEnd();
 }
 
 function preencherDataHorarioCompareceu(original, { dataTeste, horario, compareceu }) {
@@ -109,10 +101,6 @@ function preencherPlacaAutomatizado(original, { placa, automatizado }) {
 function preencherSimNao(original, marcado) {
   if (!marcado) return original;
   return original.replace(/\(\s*\)/, '( X )');
-}
-
-function preencherObs(texto) {
-  return `Obs: ${texto || ''}`.trimEnd();
 }
 
 function preencherAssinatura(original, { avaliador, data }) {
