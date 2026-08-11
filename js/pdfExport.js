@@ -14,8 +14,7 @@ function aguardarImagens(elemento) {
   }));
 }
 
-async function gerarBlobPDF(avaliacao) {
-  const elemento = montarElementoDocumentoPDF(avaliacao);
+async function renderizarPaginaNoPDF(doc, elemento, primeiraPagina) {
   document.body.appendChild(elemento);
   try {
     await aguardarImagens(elemento);
@@ -28,8 +27,6 @@ async function gerarBlobPDF(avaliacao) {
       windowWidth: PDF_LARGURA_PX
     });
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
     const larguraPaginaMm = 210;
@@ -44,11 +41,23 @@ async function gerarBlobPDF(avaliacao) {
     }
     const offsetXMm = (larguraPaginaMm - desenhoLarguraMm) / 2;
 
+    if (!primeiraPagina) doc.addPage();
     doc.addImage(imgData, 'JPEG', offsetXMm, 0, desenhoLarguraMm, desenhoAlturaMm);
-    return doc.output('blob');
   } finally {
     document.body.removeChild(elemento);
   }
+}
+
+async function gerarBlobPDF(avaliacao) {
+  const paginas = montarPaginasDocumentoPDF(avaliacao);
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+  for (let i = 0; i < paginas.length; i++) {
+    await renderizarPaginaNoPDF(doc, paginas[i], i === 0);
+  }
+
+  return doc.output('blob');
 }
 
 function nomeArquivoExportadoPDF(avaliacao) {

@@ -170,7 +170,8 @@ async function gerarZipPreenchido(avaliacao) {
   // "Obs:" já existe no template (linha 39, logo após o SCORE TOTAL) — só anexa o texto.
   sheetXml = definirCelulaTexto(sheetXml, c.obs, preencherRotulo(ler(c.obs), avaliacao.parecer));
 
-  // "Parecer" (B48:G49) nunca é escrito — permanece exatamente como está no template.
+  // Página 2 ("PARECER", linhas 47-77) nunca é escrita — fica sempre em branco,
+  // para preenchimento manual posterior no papel/PDF impresso.
 
   const dataAssinatura = avaliacao.finalizadaEm ? formatarDataBR(avaliacao.finalizadaEm.slice(0, 10)) : formatarDataBR(hojeISO());
   sheetXml = definirCelulaTexto(sheetXml, c.assinatura, preencherAssinatura(ler(c.assinatura), {

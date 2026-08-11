@@ -1,6 +1,6 @@
 /* LEMAR Teste Prático de Motoristas — Service Worker (offline-first) */
 
-const CACHE_VERSION = 'lemar-teste-pratico-v3';
+const CACHE_VERSION = 'lemar-teste-pratico-v4';
 
 const ARQUIVOS_ESSENCIAIS = [
   './',

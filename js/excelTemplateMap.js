@@ -24,13 +24,18 @@ const EXCEL_TEMPLATE = {
     contratacaoSim: 'F44',
     contratacaoNao: 'G44',
     obs: 'A39',
-    assinatura: 'A51'
+    assinatura: 'A46'
   },
 
   // "Obs" (A39) já existe como rótulo fixo no template, logo após o SCORE TOTAL —
   // a observação do monitor é apenas anexada a esse texto, sem criar mesclagem nova.
-  // O bloco "Parecer" (B48:G49/A50) é reservado para preenchimento manual posterior
-  // e NUNCA recebe texto do app — nenhuma célula dessa região é tocada na exportação.
+  //
+  // A partir da v1.3, o template tem 2 páginas de impressão: página 1 = formulário
+  // (linhas 1-46, terminando na assinatura do avaliador), página 2 = folha de
+  // "PARECER" em branco (linhas 47-77, título + Nome/Data + 27 linhas para escrita
+  // manual). A quebra de página é uma quebra manual fixa após a linha 46
+  // (rowBreaks no XML do template) — nenhuma célula da página 2 é tocada na
+  // exportação, ela é sempre preenchida manualmente depois, no papel/PDF impresso.
 
   // Linha inicial de cada grupo na grade de critérios (colunas C..G = notas 1..5, H = score).
   linhaInicialGrupo: {

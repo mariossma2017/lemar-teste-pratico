@@ -1,9 +1,15 @@
 /**
  * Monta o documento HTML (formato A4) usado para gerar o PDF do Teste Prático.
  * É uma estrutura própria, dedicada a impressão/exportação — não é a tela do app.
- * Segue o mesmo mapeamento de dados usado na exportação Excel (js/excelTemplateMap.js),
- * mas o "Parecer" aqui é SEMPRE deixado em branco (preenchimento manual posterior).
+ * Segue o mesmo mapeamento de dados usado na exportação Excel (js/excelTemplateMap.js).
+ *
+ * O PDF tem 2 páginas fixas: página 1 = formulário de avaliação, página 2 = folha
+ * de "PARECER" em branco (título + Nome/Data + linhas para escrita manual, nunca
+ * preenchida pelo app). `montarPaginasDocumentoPDF` retorna os dois elementos já
+ * prontos para serem renderizados (um html2canvas por página) em pdfExport.js.
  */
+
+const PDF_PARECER_LINHAS = 27;
 
 const PDF_LARGURA_PX = 794; // 210mm a 96dpi
 const PDF_ALTURA_PX = 1123; // 297mm a 96dpi
@@ -30,7 +36,7 @@ function pdfLinhasGrupo(avaliacao, grupoKey, rotuloGrupo) {
   }).join('');
 }
 
-function montarElementoDocumentoPDF(avaliacao) {
+function montarElementoPagina1DocumentoPDF(avaliacao) {
   const r = calcularScore(avaliacao);
   const cand = avaliacao.candidato;
   const dataBR = formatarDataBR(cand.dataTeste);
@@ -111,10 +117,6 @@ function montarElementoDocumentoPDF(avaliacao) {
         border: 1px solid #000000; border-top: none; padding: 5px 8px; font-size: 9px; font-weight: 700;
       }
 
-      .pdf-parecer-box { border: 1px solid #000000; border-top: none; margin-bottom: 0; }
-      .pdf-parecer-titulo { text-align: center; font-size: 14px; font-weight: 800; padding: 6px; border-bottom: 1px solid #000000; }
-      .pdf-parecer-vazio { min-height: 130px; }
-
       .pdf-assinatura { border: 1px solid #000000; border-top: none; padding: 8px; font-size: 9px; }
     </style>
 
@@ -177,13 +179,58 @@ function montarElementoDocumentoPDF(avaliacao) {
       <span>NÃO ( ${marcaX(avaliacao.recomendaContratacao === false)} )</span>
     </div>
 
-    <div class="pdf-parecer-box">
-      <div class="pdf-parecer-titulo">Parecer</div>
-      <div class="pdf-parecer-vazio"></div>
-    </div>
-
     <div class="pdf-assinatura">Nome: ${escapeHtml(cand.avaliador)} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Data: ${escapeHtml(dataAssinatura)}</div>
   `;
 
   return wrapper;
+}
+
+function montarElementoPagina2Parecer() {
+  const wrapper = document.createElement('div');
+  wrapper.id = 'pdf-doc-root-parecer';
+  wrapper.style.position = 'fixed';
+  wrapper.style.left = '-99999px';
+  wrapper.style.top = '0';
+  wrapper.style.width = `${PDF_LARGURA_PX}px`;
+  wrapper.style.height = `${PDF_ALTURA_PX}px`;
+  wrapper.style.background = '#ffffff';
+
+  const linhas = Array.from({ length: PDF_PARECER_LINHAS }, () => '<div class="pdf-parecer-linha"></div>').join('');
+
+  wrapper.innerHTML = `
+    <style>
+      #pdf-doc-root-parecer, #pdf-doc-root-parecer * { box-sizing: border-box; }
+      #pdf-doc-root-parecer {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000000;
+        padding: 26px 28px;
+        width: ${PDF_LARGURA_PX}px;
+        height: ${PDF_ALTURA_PX}px;
+        background: #ffffff;
+      }
+      .pdf-parecer-titulo-pagina {
+        text-align: center; font-size: 24px; font-weight: 800; letter-spacing: 0.5px;
+        padding-bottom: 10px; border-bottom: 1px solid #000000; margin-bottom: 22px;
+      }
+      .pdf-parecer-nomedata { display: flex; align-items: baseline; font-size: 11px; font-weight: 700; margin-bottom: 30px; }
+      .pdf-parecer-nomedata .campo-nome { flex: 1 1 auto; display: flex; align-items: baseline; gap: 6px; }
+      .pdf-parecer-nomedata .campo-nome .linha { flex: 1 1 auto; border-bottom: 1px solid #000000; height: 1px; margin-left: 4px; }
+      .pdf-parecer-nomedata .campo-data { flex: 0 0 auto; display: flex; align-items: baseline; gap: 6px; margin-left: 24px; }
+      .pdf-parecer-nomedata .campo-data .linha { width: 130px; border-bottom: 1px solid #000000; height: 1px; }
+      .pdf-parecer-linha { border-bottom: 1px solid #000000; height: 35px; }
+    </style>
+
+    <div class="pdf-parecer-titulo-pagina">PARECER</div>
+    <div class="pdf-parecer-nomedata">
+      <div class="campo-nome">Nome:<div class="linha"></div></div>
+      <div class="campo-data">Data:<div class="linha"></div></div>
+    </div>
+    ${linhas}
+  `;
+
+  return wrapper;
+}
+
+function montarPaginasDocumentoPDF(avaliacao) {
+  return [montarElementoPagina1DocumentoPDF(avaliacao), montarElementoPagina2Parecer()];
 }
