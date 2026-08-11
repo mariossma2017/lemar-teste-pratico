@@ -1,0 +1,483 @@
+:root {
+  --amarelo: #ffcc00;
+  --amarelo-escuro: #e0b400;
+  --preto: #1c1c1c;
+  --grafite: #3a3d40;
+  --grafite-claro: #575b5e;
+  --cinza: #cccccc;
+  --cinza-claro: #f2f2f2;
+  --cinza-borda: #e0e0e0;
+  --branco: #ffffff;
+
+  --verde: #1f8a4d;
+  --verde-bg: #e6f5ec;
+  --vermelho: #c0392b;
+  --vermelho-bg: #fbe9e7;
+  --amarelo-status-bg: #fff4cc;
+  --cinza-status: #999999;
+
+  --raio: 10px;
+  --raio-lg: 14px;
+  --sombra: 0 1px 3px rgba(0, 0, 0, 0.12);
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--cinza-claro);
+  color: var(--preto);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body { padding-bottom: calc(24px + var(--safe-bottom)); }
+
+button, input, textarea, select { font-family: inherit; }
+
+a { color: inherit; }
+
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ---------- Header / nav ---------- */
+
+.app-header {
+  background: var(--preto);
+  color: var(--branco);
+  padding: calc(12px + var(--safe-top)) 16px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: var(--sombra);
+}
+
+.app-header .brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.app-header .brand .logo-mark {
+  color: var(--amarelo);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+}
+
+.app-header .brand .brand-sub {
+  font-size: 13px;
+  color: var(--cinza);
+}
+
+.app-nav {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.app-nav a {
+  flex: 1;
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: var(--raio);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cinza);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.app-nav a.active {
+  background: var(--amarelo);
+  color: var(--preto);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--grafite);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  margin: 16px 0 4px;
+}
+
+/* ---------- Layout blocks ---------- */
+
+.page-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 16px 0 4px;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--grafite-claro);
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--grafite-claro);
+  margin: 24px 0 10px;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: none;
+  border-radius: var(--raio-lg);
+  padding: 16px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.05s ease;
+  gap: 8px;
+}
+
+.btn:active { transform: scale(0.98); }
+
+.btn-primary { background: var(--amarelo); color: var(--preto); }
+.btn-dark { background: var(--preto); color: var(--branco); }
+.btn-outline { background: var(--branco); color: var(--preto); border: 2px solid var(--preto); }
+.btn-danger { background: var(--vermelho-bg); color: var(--vermelho); border: 2px solid var(--vermelho); }
+.btn-ghost { background: transparent; color: var(--grafite); font-weight: 600; }
+.btn-sm { padding: 10px 12px; font-size: 14px; border-radius: var(--raio); }
+.btn-block-gap { margin-top: 12px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-row { display: flex; gap: 10px; }
+.btn-row .btn { flex: 1; }
+
+/* ---------- Cards ---------- */
+
+.card {
+  background: var(--branco);
+  border-radius: var(--raio-lg);
+  padding: 16px;
+  box-shadow: var(--sombra);
+  margin-bottom: 14px;
+}
+
+.card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card-grupo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-grupo .titulo { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+.card-grupo .info { font-size: 13px; color: var(--grafite-claro); }
+.card-grupo .score-mini { font-size: 20px; font-weight: 800; white-space: nowrap; }
+.card-grupo .chevron { color: var(--cinza); font-size: 22px; }
+
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.status-dot.ADEQUADO { background: var(--verde); }
+.status-dot.ATENCAO { background: var(--amarelo-escuro); }
+.status-dot.CRITICO { background: var(--vermelho); }
+.status-dot.INCOMPLETO { background: var(--cinza-status); }
+
+/* ---------- Score display (dashboard/resumo) ---------- */
+
+.score-hero {
+  text-align: center;
+  padding: 20px 16px;
+  background: var(--preto);
+  color: var(--branco);
+  border-radius: var(--raio-lg);
+  margin: 16px 0;
+}
+
+.score-hero .nome { font-size: 15px; color: var(--cinza); margin-bottom: 6px; font-weight: 600; }
+.score-hero .fracao { font-size: 42px; font-weight: 800; line-height: 1; }
+.score-hero .fracao small { font-size: 20px; color: var(--cinza); font-weight: 600; }
+.score-hero .percentual { font-size: 13px; color: var(--cinza); margin-top: 6px; }
+
+.badge-status {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+}
+.badge-status.apto { background: var(--verde); color: var(--branco); }
+.badge-status.treinamento { background: var(--amarelo); color: var(--preto); }
+.badge-status.naoApto { background: var(--vermelho); color: var(--branco); }
+.badge-status.incompleto { background: var(--grafite-claro); color: var(--branco); }
+
+.progress-bar-track {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 14px;
+}
+.progress-bar-fill { height: 100%; background: var(--amarelo); }
+
+.progress-bar-track.light { background: var(--cinza-borda); }
+.progress-bar-track.light .progress-bar-fill { background: var(--preto); }
+
+/* ---------- Grupo (avaliação de critérios) ---------- */
+
+.checklist { display: flex; flex-direction: column; gap: 2px; margin-bottom: 18px; }
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--raio);
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  cursor: pointer;
+  font-size: 14px;
+}
+.checklist-item.ativo { border-color: var(--preto); border-width: 2px; }
+.checklist-item .marca { font-weight: 800; width: 18px; text-align: center; flex-shrink: 0; }
+.checklist-item.feito .marca { color: var(--verde); }
+.checklist-item.pendente .marca { color: var(--cinza-status); }
+.checklist-item .rotulo { flex: 1; }
+.checklist-item .nota-mini { font-weight: 800; color: var(--grafite-claro); }
+
+.item-ativo-card {
+  background: var(--branco);
+  border-radius: var(--raio-lg);
+  box-shadow: var(--sombra);
+  padding: 18px 16px;
+  margin-bottom: 16px;
+}
+.item-ativo-card .contador { font-size: 12px; color: var(--grafite-claro); font-weight: 700; margin-bottom: 4px; }
+.item-ativo-card .rotulo { font-size: 19px; font-weight: 800; margin-bottom: 16px; }
+
+.grade-buttons {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.grade-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 2px solid var(--cinza-borda);
+  background: var(--branco);
+  border-radius: var(--raio);
+  padding: 10px 2px 8px;
+  cursor: pointer;
+  min-height: 68px;
+}
+
+.grade-btn .num { font-size: 22px; font-weight: 800; }
+.grade-btn .lbl { font-size: 9.5px; text-align: center; line-height: 1.15; color: var(--grafite-claro); font-weight: 700; text-transform: uppercase; }
+
+.grade-btn.selecionado {
+  border-color: var(--preto);
+  background: var(--amarelo);
+}
+.grade-btn.selecionado .lbl { color: var(--preto); }
+
+.grade-btn.n1.selecionado, .grade-btn.n2.selecionado { background: var(--vermelho-bg); border-color: var(--vermelho); }
+.grade-btn.n1.selecionado .num, .grade-btn.n2.selecionado .num { color: var(--vermelho); }
+.grade-btn.n3.selecionado { background: var(--amarelo-status-bg); border-color: var(--amarelo-escuro); }
+.grade-btn.n4.selecionado, .grade-btn.n5.selecionado { background: var(--verde-bg); border-color: var(--verde); }
+.grade-btn.n4.selecionado .num, .grade-btn.n5.selecionado .num { color: var(--verde); }
+
+.legenda-notas {
+  font-size: 12px;
+  color: var(--grafite-claro);
+  text-align: center;
+  margin-top: 10px;
+}
+
+.salvo-indicador {
+  font-size: 12px;
+  color: var(--verde);
+  text-align: center;
+  margin-top: 8px;
+  min-height: 16px;
+}
+
+/* ---------- Forms ---------- */
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--grafite);
+  margin-bottom: 6px;
+}
+.field .obrigatorio { color: var(--vermelho); }
+
+.input, .textarea, select.input {
+  width: 100%;
+  border: 2px solid var(--cinza-borda);
+  border-radius: var(--raio);
+  padding: 13px 14px;
+  font-size: 16px;
+  background: var(--branco);
+  color: var(--preto);
+}
+.input:focus, .textarea:focus { outline: none; border-color: var(--preto); }
+.textarea { min-height: 120px; resize: vertical; }
+
+.erro-campo { color: var(--vermelho); font-size: 12px; margin-top: 4px; }
+
+.toggle-group { display: flex; gap: 10px; }
+.toggle-opcao {
+  flex: 1;
+  text-align: center;
+  padding: 13px;
+  border-radius: var(--raio);
+  border: 2px solid var(--cinza-borda);
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--branco);
+}
+.toggle-opcao.selecionado { background: var(--preto); color: var(--branco); border-color: var(--preto); }
+.toggle-opcao.selecionado.sim { background: var(--verde); border-color: var(--verde); }
+.toggle-opcao.selecionado.nao { background: var(--vermelho); border-color: var(--vermelho); }
+
+/* ---------- Resumo / pontos fortes/fracos ---------- */
+
+.mini-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+.mini-card { background: var(--branco); border-radius: var(--raio); padding: 12px 6px; text-align: center; box-shadow: var(--sombra); }
+.mini-card .titulo { font-size: 10.5px; font-weight: 700; color: var(--grafite-claro); text-transform: uppercase; margin-bottom: 6px; }
+.mini-card .valor { font-size: 18px; font-weight: 800; }
+.mini-card .tag { font-size: 10px; font-weight: 700; margin-top: 4px; padding: 2px 6px; border-radius: 999px; display: inline-block; }
+.mini-card .tag.ADEQUADO { background: var(--verde-bg); color: var(--verde); }
+.mini-card .tag.ATENCAO { background: var(--amarelo-status-bg); color: var(--amarelo-escuro); }
+.mini-card .tag.CRITICO { background: var(--vermelho-bg); color: var(--vermelho); }
+
+.lista-pontos { list-style: none; padding: 0; margin: 0; }
+.lista-pontos li {
+  padding: 10px 12px;
+  border-radius: var(--raio);
+  margin-bottom: 6px;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.lista-pontos.fracos li { background: var(--vermelho-bg); color: var(--vermelho); }
+.lista-pontos.fortes li { background: var(--verde-bg); color: var(--verde); }
+.lista-pontos li .nota { font-weight: 800; }
+
+.aviso-pendentes {
+  background: var(--amarelo-status-bg);
+  border: 1px solid var(--amarelo-escuro);
+  border-radius: var(--raio-lg);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.aviso-pendentes .titulo { font-weight: 800; margin-bottom: 8px; }
+.aviso-pendentes ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.aviso-pendentes li a {
+  display: block;
+  text-decoration: none;
+  color: var(--preto);
+  font-size: 14px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.parecer-preview { white-space: pre-wrap; font-size: 14px; color: var(--grafite); line-height: 1.5; }
+
+/* ---------- Histórico ---------- */
+
+.hist-card { background: var(--branco); border-radius: var(--raio-lg); box-shadow: var(--sombra); padding: 14px 16px; margin-bottom: 12px; }
+.hist-card .topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.hist-card .nome { font-size: 16px; font-weight: 800; }
+.hist-card .data { font-size: 12px; color: var(--grafite-claro); margin-top: 2px; }
+.hist-card .score { font-size: 20px; font-weight: 800; text-align: right; white-space: nowrap; }
+.hist-card .resultado-label { font-size: 11px; font-weight: 700; text-align: right; }
+.hist-card .acoes { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+.hist-card .acoes button { flex: 1; min-width: 72px; }
+
+.vazio { text-align: center; color: var(--grafite-claro); padding: 40px 16px; font-size: 14px; }
+.vazio .icone { font-size: 40px; margin-bottom: 10px; }
+
+/* ---------- Modal simples ---------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 50;
+  padding: 0;
+}
+.modal-overlay[hidden] { display: none; }
+.modal-box {
+  background: var(--branco);
+  border-radius: 18px 18px 0 0;
+  padding: 22px 18px calc(22px + var(--safe-bottom));
+  width: 100%;
+  max-width: 640px;
+}
+.modal-box .titulo { font-size: 18px; font-weight: 800; margin-bottom: 10px; }
+.modal-box .texto { font-size: 14px; color: var(--grafite); margin-bottom: 18px; }
+
+.toast {
+  position: fixed;
+  bottom: calc(20px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--preto);
+  color: var(--branco);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 60;
+  box-shadow: var(--sombra);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.toast.visivel { opacity: 1; }
+
+/* ---------- Config ---------- */
+
+.file-btn-wrapper { position: relative; overflow: hidden; }
+.file-btn-wrapper input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+hr.divisor { border: none; border-top: 1px solid var(--cinza-borda); margin: 24px 0; }
+
+@media (min-width: 640px) {
+  .grade-btn .num { font-size: 24px; }
+}
