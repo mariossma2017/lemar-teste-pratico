@@ -1,6 +1,6 @@
 /* LEMAR Teste Prático de Motoristas — Service Worker (offline-first) */
 
-const CACHE_VERSION = 'lemar-teste-pratico-v1';
+const CACHE_VERSION = 'lemar-teste-pratico-v2';
 
 const ARQUIVOS_ESSENCIAIS = [
   './',
@@ -8,6 +8,9 @@ const ARQUIVOS_ESSENCIAIS = [
   './manifest.json',
   './css/styles.css',
   './js/vendor/exceljs.min.js',
+  './js/vendor/jspdf.umd.min.js',
+  './js/vendor/html2canvas.min.js',
+  './js/assets.js',
   './js/criterios.js',
   './js/scoringRules.js',
   './js/scoring.js',
@@ -16,8 +19,11 @@ const ARQUIVOS_ESSENCIAIS = [
   './js/validation.js',
   './js/excelTemplateMap.js',
   './js/excelExport.js',
+  './js/pdfTemplate.js',
+  './js/pdfExport.js',
   './js/app.js',
   './templates/teste-pratico-motoristas.xlsx',
+  './assets/logo-lemar.png',
   './icons/icon.svg'
 ];
 

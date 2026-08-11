@@ -11,16 +11,24 @@ Aplicativo web/PWA para digitalizar o **Teste Prático de Motoristas** da LEMAR 
 3. Na tela da avaliação, toque em cada um dos três grupos (**Verificações**, **Habilidades**, **Comportamento**) e registre a nota de 1 a 5 de cada critério — um toque já salva e recalcula tudo.
 4. Preencha **Observações / Parecer**, a indicação de treinamento e a recomendação de contratação.
 5. Quando os 25 critérios estiverem avaliados, toque em **Ver Resumo e Finalizar** para conferir o resultado e finalizar.
-6. Toque em **Exportar Excel** para baixar o arquivo preenchido no padrão oficial da LEMAR.
+6. Toque em **Exportar Excel** para baixar o arquivo preenchido no padrão oficial da LEMAR, ou em **Exportar PDF** para gerar um documento visualmente fiel ao formulário, pronto para baixar ou compartilhar (ex.: WhatsApp) direto pelo celular.
 
-Todas as avaliações ficam salvas no próprio dispositivo (mesmo sem internet) e podem ser consultadas, editadas, duplicadas ou excluídas em **Histórico**.
+Todas as avaliações ficam salvas no próprio dispositivo (mesmo sem internet) e podem ser consultadas, editadas, duplicadas, exportadas ou excluídas em **Histórico**.
+
+### Exportar PDF e compartilhar
+
+Ao tocar em **Exportar PDF**, o app gera um documento A4 próprio (não é um print da tela) reproduzindo o formulário oficial: identificação do candidato, os 25 critérios com as notas marcadas, scores, SCORE TOTAL, classificação e o campo **Obs** (com a observação digitada pelo avaliador, logo após o Score Total). O bloco **Parecer** é sempre entregue **totalmente em branco**, para preenchimento manual posterior por outra pessoa.
+
+Depois de gerado, aparecem as opções:
+- **Compartilhar** — usa a Web Share API (`navigator.share`) para abrir o menu nativo de compartilhamento do celular (WhatsApp, e-mail, etc.) já com o PDF anexado. Só aparece em dispositivos/navegadores compatíveis (`navigator.canShare({ files })`).
+- **Baixar PDF** — sempre disponível, inclusive em desktop ou navegadores sem suporte a compartilhamento de arquivos.
 
 ## Como instalar (PWA)
 
 - **Celular (Android/iOS):** abra a URL do app no navegador e use a opção "Adicionar à tela inicial" / "Instalar app" do menu do navegador.
 - **Desktop (Chrome/Edge):** clique no ícone de instalação na barra de endereço.
 
-Depois de instalado, o app funciona normalmente sem internet — inclusive a exportação para Excel.
+Depois de instalado, o app funciona normalmente sem internet — inclusive a exportação para Excel e para PDF (o compartilhamento em si depende do sistema operacional ter apps compatíveis instalados).
 
 ## Como executar localmente
 
@@ -50,9 +58,15 @@ js/
   validation.js                Validações de formulário e de finalização
   excelTemplateMap.js          Mapeamento app ↔ células do Excel (única fonte de verdade)
   excelExport.js               Geração do Excel preenchido a partir do template (ExcelJS)
+  pdfTemplate.js                Monta o documento HTML próprio (A4) usado para gerar o PDF
+  pdfExport.js                  Converte esse HTML em PDF (html2canvas + jsPDF) e compartilha
+  assets.js                     Logo da LEMAR embutido em base64 (uso 100% offline no PDF)
   app.js                       Roteamento por hash e todas as telas
   vendor/exceljs.min.js        Biblioteca ExcelJS (vendorizada para funcionar offline)
+  vendor/jspdf.umd.min.js       Biblioteca jsPDF (vendorizada)
+  vendor/html2canvas.min.js     Biblioteca html2canvas (vendorizada)
 templates/teste-pratico-motoristas.xlsx   Template oficial (não é alterado)
+assets/logo-lemar.png                      Logo LEMAR usado no cabeçalho do PDF
 manifest.json, service-worker.js, icons/  PWA
 ```
 
@@ -68,7 +82,9 @@ Edite `js/scoringRules.js` — pontuação máxima por grupo, faixas de "ponto d
 
 ## Como alterar o mapeamento do Excel
 
-Edite `js/excelTemplateMap.js`. Esse arquivo é a única fonte de verdade sobre qual célula do template recebe cada dado: identificação do candidato, colunas de nota (1 a 5), coluna de score, células de score por grupo, score total, treinamento/contratação e parecer. As funções `preencher*` nunca hardcodam o texto fixo do formulário — elas sempre partem do texto que já está na célula do template, garantindo que rótulos e legendas originais nunca sejam alterados.
+Edite `js/excelTemplateMap.js`. Esse arquivo é a única fonte de verdade sobre qual célula do template recebe cada dado: identificação do candidato, colunas de nota (1 a 5), coluna de score, células de score por grupo, score total e treinamento/contratação. As funções `preencher*` nunca hardcodam o texto fixo do formulário — elas sempre partem do texto que já está na célula do template, garantindo que rótulos e legendas originais nunca sejam alterados.
+
+A observação digitada pelo avaliador (campo "Observações / Parecer" do app) é exportada no campo **Obs**, logo abaixo do SCORE TOTAL (célula `A39`, mesclada até `H39`) — tanto no Excel quanto no PDF. O bloco **Parecer** do formulário (`A50`) é intencionalmente deixado em branco em ambas as exportações, pois é reservado para preenchimento manual posterior por outra pessoa; nenhuma função do app escreve nessa célula.
 
 ## Backup e restauração
 

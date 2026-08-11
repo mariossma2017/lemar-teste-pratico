@@ -165,6 +165,14 @@ a { color: inherit; }
 .btn-row { display: flex; gap: 10px; }
 .btn-row .btn { flex: 1; }
 
+.btn-row-export { display: flex; flex-direction: column; gap: 10px; }
+.btn-row-export .btn { width: 100%; }
+@media (min-width: 480px) {
+  .btn-row-export { flex-direction: row; }
+}
+
+.btn-loading { opacity: 0.7; pointer-events: none; }
+
 /* ---------- Cards ---------- */
 
 .card {

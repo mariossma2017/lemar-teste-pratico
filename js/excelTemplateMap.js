@@ -23,10 +23,15 @@ const EXCEL_TEMPLATE = {
     treinamentoNao: 'G43',
     contratacaoSim: 'F44',
     contratacaoNao: 'G44',
+    obs: 'A39',
     parecer: 'A50',
     assinatura: 'A51'
   },
 
+  // "Obs" recebe a observação do monitor, imediatamente após o SCORE TOTAL.
+  // O bloco "Parecer" (parecerMergeRange) é reservado para preenchimento manual
+  // posterior e NUNCA deve receber texto do app — fica sempre em branco.
+  obsMergeRange: 'A39:H39',
   parecerMergeRange: 'A50:H50',
 
   // Linha inicial de cada grupo na grade de critérios (colunas C..G = notas 1..5, H = score).
@@ -104,6 +109,10 @@ function preencherPlacaAutomatizado(original, { placa, automatizado }) {
 function preencherSimNao(original, marcado) {
   if (!marcado) return original;
   return original.replace(/\(\s*\)/, '( X )');
+}
+
+function preencherObs(texto) {
+  return `Obs: ${texto || ''}`.trimEnd();
 }
 
 function preencherAssinatura(original, { avaliador, data }) {

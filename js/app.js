@@ -565,10 +565,11 @@ async function renderResumo(app, id) {
         <ul>${validacao.pendentes.map((p) => `<li><a href="#/avaliacao/${av.id}/grupo/${p.grupo}?item=${p.key}">${escapeHtml(p.label)}</a></li>`).join('')}</ul>
       </div>` : ''}
 
-      <div class="btn-row" style="margin-top:20px;">
+      <div class="btn-row-export" style="margin-top:20px;">
         <button class="btn btn-dark" id="btn-exportar">EXPORTAR EXCEL</button>
-        <a href="#/avaliacao/${id}" class="btn btn-outline">EDITAR</a>
+        <button class="btn btn-dark" id="btn-exportar-pdf">EXPORTAR PDF</button>
       </div>
+      <a href="#/avaliacao/${id}" class="btn btn-outline btn-block-gap">EDITAR</a>
       ${!av.finalizada
         ? `<button class="btn btn-primary btn-block-gap" id="btn-finalizar" ${!validacao.valido ? 'disabled' : ''}>FINALIZAR AVALIAÇÃO</button>`
         : `<div class="salvo-indicador" style="margin-top:12px;">Finalizada em ${formatarDataHoraBR(av.finalizadaEm)}</div>`}
@@ -584,6 +585,14 @@ async function renderResumo(app, id) {
         </div>
       </div>
     </div>
+
+    <div class="modal-overlay" id="modal-pdf" hidden>
+      <div class="modal-box">
+        <div class="titulo">PDF gerado com sucesso</div>
+        <div class="texto">${escapeHtml(av.candidato.nome)} — ${r.total}/${SCORING_RULES.totalMax}</div>
+        <div class="btn-row-export" id="pdf-modal-botoes"></div>
+      </div>
+    </div>
   `;
 
   document.getElementById('btn-exportar').addEventListener('click', async () => {
@@ -593,6 +602,25 @@ async function renderResumo(app, id) {
     } catch (err) {
       console.error(err);
       showToast('Erro ao exportar Excel');
+    }
+  });
+
+  const btnExportarPdf = document.getElementById('btn-exportar-pdf');
+  btnExportarPdf.addEventListener('click', async () => {
+    btnExportarPdf.disabled = true;
+    btnExportarPdf.classList.add('btn-loading');
+    btnExportarPdf.textContent = 'GERANDO PDF...';
+    try {
+      const blob = await gerarBlobPDF(av);
+      const nomeArquivo = nomeArquivoExportadoPDF(av);
+      abrirModalPdf(blob, nomeArquivo, av);
+    } catch (err) {
+      console.error(err);
+      showToast('Erro ao gerar PDF');
+    } finally {
+      btnExportarPdf.disabled = false;
+      btnExportarPdf.classList.remove('btn-loading');
+      btnExportarPdf.textContent = 'EXPORTAR PDF';
     }
   });
 
@@ -612,6 +640,41 @@ async function renderResumo(app, id) {
       renderResumo(app, id);
     });
   }
+}
+
+function abrirModalPdf(blob, nomeArquivo, av) {
+  const modal = document.getElementById('modal-pdf');
+  const botoesEl = document.getElementById('pdf-modal-botoes');
+  const file = new File([blob], nomeArquivo, { type: 'application/pdf' });
+  const podeCompartilhar = suportaCompartilharArquivo(file);
+
+  botoesEl.innerHTML = podeCompartilhar
+    ? `<button class="btn btn-primary" id="btn-pdf-compartilhar">COMPARTILHAR</button><button class="btn btn-outline" id="btn-pdf-baixar">BAIXAR PDF</button>`
+    : `<button class="btn btn-primary" id="btn-pdf-baixar">BAIXAR PDF</button>`;
+
+  document.getElementById('btn-pdf-baixar').addEventListener('click', () => {
+    baixarBlob(blob, nomeArquivo);
+    modal.hidden = true;
+    showToast('PDF baixado');
+  });
+
+  const btnCompartilhar = document.getElementById('btn-pdf-compartilhar');
+  if (btnCompartilhar) {
+    btnCompartilhar.addEventListener('click', async () => {
+      try {
+        await compartilharPDF(file, av);
+        modal.hidden = true;
+        showToast('PDF compartilhado');
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error(err);
+          showToast('Não foi possível compartilhar');
+        }
+      }
+    });
+  }
+
+  modal.hidden = false;
 }
 
 // ---------------------------------------------------------------- histórico
@@ -666,6 +729,18 @@ async function renderHistorico(app) {
       } else if (acao === 'exportar') {
         try { await exportarAvaliacaoExcel(av); showToast('Excel exportado'); }
         catch (err) { console.error(err); showToast('Erro ao exportar Excel'); }
+      } else if (acao === 'exportar-pdf') {
+        btn.disabled = true;
+        try {
+          const blob = await gerarBlobPDF(av);
+          baixarBlob(blob, nomeArquivoExportadoPDF(av));
+          showToast('PDF exportado');
+        } catch (err) {
+          console.error(err);
+          showToast('Erro ao gerar PDF');
+        } finally {
+          btn.disabled = false;
+        }
       } else if (acao === 'excluir') {
         idParaExcluir = idAlvo;
         document.getElementById('texto-excluir').textContent = `Tem certeza que deseja excluir a avaliação de ${av.candidato.nome}? Esta ação não pode ser desfeita.`;
@@ -706,7 +781,8 @@ function cardHistoricoCompleto(av) {
       <button class="btn btn-sm btn-outline" data-acao="ver" data-id="${av.id}">Ver</button>
       <button class="btn btn-sm btn-outline" data-acao="editar" data-id="${av.id}">Editar</button>
       <button class="btn btn-sm btn-outline" data-acao="duplicar" data-id="${av.id}">Duplicar</button>
-      <button class="btn btn-sm btn-outline" data-acao="exportar" data-id="${av.id}">Exportar</button>
+      <button class="btn btn-sm btn-outline" data-acao="exportar" data-id="${av.id}">Excel</button>
+      <button class="btn btn-sm btn-outline" data-acao="exportar-pdf" data-id="${av.id}">PDF</button>
       <button class="btn btn-sm btn-danger" data-acao="excluir" data-id="${av.id}">Excluir</button>
     </div>
   </div>`;

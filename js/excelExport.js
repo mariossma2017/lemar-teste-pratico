@@ -67,13 +67,14 @@ async function gerarWorkbookPreenchido(avaliacao) {
   ws.getCell(c.contratacaoSim).value = preencherSimNao(ws.getCell(c.contratacaoSim).value, avaliacao.recomendaContratacao === true);
   ws.getCell(c.contratacaoNao).value = preencherSimNao(ws.getCell(c.contratacaoNao).value, avaliacao.recomendaContratacao === false);
 
-  if (avaliacao.parecer) {
-    try { ws.mergeCells(EXCEL_TEMPLATE.parecerMergeRange); } catch (e) { /* já mesclado */ }
-    const parecerCell = ws.getCell(c.parecer);
-    parecerCell.value = avaliacao.parecer;
-    parecerCell.alignment = { horizontal: 'left', vertical: 'top', wrapText: true };
-    parecerCell.font = { name: 'Calibri', size: 10 };
-  }
+  // Observação do monitor: vai para o campo "Obs" logo após o SCORE TOTAL.
+  try { ws.mergeCells(EXCEL_TEMPLATE.obsMergeRange); } catch (e) { /* já mesclado */ }
+  const obsCell = ws.getCell(c.obs);
+  obsCell.value = preencherObs(avaliacao.parecer);
+  obsCell.alignment = { horizontal: 'left', vertical: 'top', wrapText: true };
+  obsCell.font = { name: 'Calibri', size: 9 };
+
+  // O bloco "Parecer" é reservado para preenchimento manual posterior — permanece em branco.
 
   const dataAssinatura = avaliacao.finalizadaEm ? formatarDataBR(avaliacao.finalizadaEm.slice(0, 10)) : formatarDataBR(hojeISO());
   ws.getCell(c.assinatura).value = preencherAssinatura(ws.getCell(c.assinatura).value, {
