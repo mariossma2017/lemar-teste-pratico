@@ -68,7 +68,7 @@
 </div>
 <div class="toast" id="toast"></div><article id="pdf-template" aria-hidden="true"></article>
 <script>
-  const state={photos:[],createdAt:new Date(),id:"CF-"+Date.now().toString(36).toUpperCase()};
+  const state={photos:[],createdAt:new Date(),id:"CF-"+Date.now().toString(36).toUpperCase(),pendingShareFile:null};
   const $=s=>document.querySelector(s), photosEl=$("#photos"), toastEl=$("#toast");
   window.addEventListener("load",()=>document.body.dataset.pdfReady=(typeof html2canvas==="function"&&!!window.jspdf?.jsPDF)?"true":"false");
   const labels=["Foto 01 — Placa","Foto 02 — Parte interna","Foto 03 — Parte externa"];
@@ -106,7 +106,21 @@
   function saveBlob(blob){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fileName();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),30000)}
   async function busy(button,fn){const old=button.textContent;button.disabled=true;button.textContent="Gerando...";$("#status").textContent="Preparando o documento com as fotos…";try{await fn()}catch(e){console.error(e);const detalhe=e?.message?` Detalhe: ${e.message}`:"";toast(`Não foi possível gerar o PDF.${detalhe}`)}finally{button.disabled=false;button.textContent=old;$("#status").textContent=""}}
   $("#download").onclick=()=>{if(!validate())return;busy($("#download"),async()=>saveBlob(await makeBlob()))};
-  $("#share").onclick=()=>{if(!validate())return;busy($("#share"),async()=>{const blob=await makeBlob(),file=new File([blob],fileName(),{type:"application/pdf"});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:"Conservação de Frota — Celebrar 2.0",text:`Registro do veículo ${$("#plate").value}`,files:[file]})}else{saveBlob(blob);window.open(`https://wa.me/?text=${encodeURIComponent(`Registro de conservação do veículo ${$("#plate").value}. O PDF foi baixado; anexe-o nesta conversa.`)}`,"_blank");toast("PDF baixado. Anexe o arquivo na conversa do WhatsApp.")}})};
+  $("#share").onclick=async()=>{
+    const btn=$("#share");
+    if(state.pendingShareFile){
+      const file=state.pendingShareFile;
+      try{
+        if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:"Conservação de Frota — Celebrar 2.0",text:`Registro do veículo ${$("#plate").value}`,files:[file]})}
+        else{saveBlob(file);toast("PDF baixado. Abra o WhatsApp e anexe o arquivo.")}
+        state.pendingShareFile=null;btn.textContent="Compartilhar PDF"
+      }catch(e){if(e?.name!=="AbortError"){saveBlob(file);toast("O compartilhamento foi bloqueado. O PDF foi baixado para você anexar no WhatsApp.")}}
+      return
+    }
+    if(!validate())return;
+    await busy(btn,async()=>{const blob=await makeBlob();state.pendingShareFile=new File([blob],fileName(),{type:"application/pdf"})});
+    if(state.pendingShareFile){btn.textContent="Compartilhar agora";toast("PDF pronto. Toque em “Compartilhar agora”.")}
+  };
 </script>
 </body>
 </html>
