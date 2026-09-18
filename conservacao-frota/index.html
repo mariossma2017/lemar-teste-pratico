@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#111111">
   <title>Conservação de Frota — Celebrar 2.0</title>
+  <script src="../js/vendor/html2canvas.min.js"></script>
+  <script src="../js/vendor/jspdf.umd.min.js"></script>
   <style>
     :root{--yellow:#f5c400;--ink:#191919;--gray:#6f7477;--line:#d9dcde;--soft:#f4f5f5;--danger:#b3261e;--ok:#146c43;--radius:18px}
     *{box-sizing:border-box}html{font-family:Inter,Arial,sans-serif;color:var(--ink);background:#e9ebec}body{margin:0;font-size:16px}
@@ -90,13 +92,20 @@
   function validate(){document.querySelectorAll(".error").forEach(e=>e.classList.remove("error"));const f=$("#form");if(!f.checkValidity()){f.reportValidity();return false}for(let i=0;i<3;i++){if(!state.photos[i].data){photosEl.children[i].querySelector(".photo-box").classList.add("error");toast(`Inclua a ${labels[i].toLowerCase()}.`);return false}}return true}
   function esc(v){const d=document.createElement("div");d.textContent=v||"—";return d.innerHTML}
   function buildPdf(){const rating=document.querySelector('input[name="rating"]:checked')?.value,coords=$("#coordinates").value;$("#pdf-template").innerHTML=`<div class="pdf-head"><img src="assets/logo-ssma.png"><div><h2>Formulário de Conservação de Frota — Celebrar 2.0</h2><p>Registro ${state.id} • SSMA Lemar</p></div></div><div class="pdf-grid"><div class="pdf-field"><b>Observador</b>${esc($("#observer").value)}</div><div class="pdf-field"><b>Motorista</b>${esc($("#driver").value)}</div><div class="pdf-field"><b>Placa</b>${esc($("#plate").value)}</div><div class="pdf-field"><b>Data e hora</b>${esc($("#datetime").value)}</div><div class="pdf-field"><b>Local</b>${esc($("#location").value)}</div><div class="pdf-field"><b>Classificação</b>${esc(rating)}</div></div>${coords?`<div class="pdf-field"><b>Coordenadas GPS</b>${esc(coords)} • https://maps.google.com/?q=${encodeURIComponent(coords)}</div>`:""}<div class="pdf-obs"><b>OBSERVAÇÕES</b><br><br>${esc($("#notes").value)}</div><div class="pdf-photos">${state.photos.filter(p=>p.data).map(p=>`<div class="pdf-photo"><img src="${p.data}"><p>${esc(p.label)}</p></div>`).join("")}</div><div class="pdf-foot">Declaração: as informações e imagens deste registro correspondem às condições observadas no momento da inspeção.<br>Documento gerado eletronicamente em ${formatDate(new Date())}.</div>`;return $("#pdf-template")}
-  const options=()=>({margin:[7,7,9,7],filename:`Conservacao_${$("#plate").value}_${new Date().toISOString().slice(0,10)}.pdf`,image:{type:"jpeg",quality:.84},html2canvas:{scale:1.7,useCORS:true},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"},pagebreak:{mode:["css","legacy"]}});
-  let pdfEnginePromise;
-  async function loadPdfEngine(){if(typeof html2pdf!=="undefined")return;if(!pdfEnginePromise)pdfEnginePromise=(async()=>{const names=Array.from({length:16},(_,i)=>`assets/pdf/part-${pad(i)}.txt`),parts=await Promise.all(names.map(async n=>{const r=await fetch(n);if(!r.ok)throw new Error("Falha ao carregar o gerador de PDF");return r.text()}));(0,eval)(parts.join(""))})();await pdfEnginePromise}
-  async function makeBlob(){await loadPdfEngine();if(typeof html2pdf==="undefined")throw new Error("Gerador de PDF indisponível");return await html2pdf().set(options()).from(buildPdf()).outputPdf("blob")}
+  const fileName=()=>`Conservacao_${$("#plate").value}_${new Date().toISOString().slice(0,10)}.pdf`;
+  async function makeBlob(){
+    if(typeof html2canvas!=="function"||!window.jspdf?.jsPDF)throw new Error("Gerador de PDF não carregado");
+    const node=buildPdf(),canvas=await html2canvas(node,{scale:1.45,useCORS:true,backgroundColor:"#ffffff",logging:false});
+    const {jsPDF}=window.jspdf,pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4",compress:true});
+    const margin=7,pageW=210,pageH=297,imgW=pageW-margin*2,imgH=canvas.height*imgW/canvas.width,pageBody=pageH-margin*2,data=canvas.toDataURL("image/jpeg",.82);
+    let y=margin,remaining=imgH;pdf.addImage(data,"JPEG",margin,y,imgW,imgH,undefined,"FAST");
+    while(remaining>pageBody){remaining-=pageBody;pdf.addPage();y=margin-(imgH-remaining);pdf.addImage(data,"JPEG",margin,y,imgW,imgH,undefined,"FAST")}
+    return pdf.output("blob")
+  }
+  function saveBlob(blob){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fileName();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),30000)}
   async function busy(button,fn){const old=button.textContent;button.disabled=true;button.textContent="Gerando...";$("#status").textContent="Preparando o documento com as fotos…";try{await fn()}catch(e){console.error(e);toast("Não foi possível gerar o PDF. Verifique sua conexão e tente novamente.")}finally{button.disabled=false;button.textContent=old;$("#status").textContent=""}}
-  $("#download").onclick=()=>{if(!validate())return;busy($("#download"),async()=>{await loadPdfEngine();return html2pdf().set(options()).from(buildPdf()).save()})};
-  $("#share").onclick=()=>{if(!validate())return;busy($("#share"),async()=>{const blob=await makeBlob(),file=new File([blob],options().filename,{type:"application/pdf"});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:"Conservação de Frota — Celebrar 2.0",text:`Registro do veículo ${$("#plate").value}`,files:[file]})}else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),30000);window.open(`https://wa.me/?text=${encodeURIComponent(`Registro de conservação do veículo ${$("#plate").value}. O PDF foi baixado; anexe-o nesta conversa.`)}`,"_blank");toast("PDF baixado. Anexe o arquivo na conversa do WhatsApp.")}})};
+  $("#download").onclick=()=>{if(!validate())return;busy($("#download"),async()=>saveBlob(await makeBlob()))};
+  $("#share").onclick=()=>{if(!validate())return;busy($("#share"),async()=>{const blob=await makeBlob(),file=new File([blob],fileName(),{type:"application/pdf"});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:"Conservação de Frota — Celebrar 2.0",text:`Registro do veículo ${$("#plate").value}`,files:[file]})}else{saveBlob(blob);window.open(`https://wa.me/?text=${encodeURIComponent(`Registro de conservação do veículo ${$("#plate").value}. O PDF foi baixado; anexe-o nesta conversa.`)}`,"_blank");toast("PDF baixado. Anexe o arquivo na conversa do WhatsApp.")}})};
 </script>
 </body>
 </html>
