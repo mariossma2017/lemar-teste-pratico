@@ -70,6 +70,7 @@
 <script>
   const state={photos:[],createdAt:new Date(),id:"CF-"+Date.now().toString(36).toUpperCase()};
   const $=s=>document.querySelector(s), photosEl=$("#photos"), toastEl=$("#toast");
+  window.addEventListener("load",()=>document.body.dataset.pdfReady=(typeof html2canvas==="function"&&!!window.jspdf?.jsPDF)?"true":"false");
   const labels=["Foto 01 — Placa","Foto 02 — Parte interna","Foto 03 — Parte externa"];
   const pad=n=>String(n).padStart(2,"0");
   function formatDate(d){return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`}
